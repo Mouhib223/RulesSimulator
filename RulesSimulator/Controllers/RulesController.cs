@@ -2,6 +2,18 @@
 using Microsoft.AspNetCore.Mvc;
 using RulesSimulator.Models;
 using System.Data;
+using System.Net;
+using System.Text;
+using System.IO;
+using System.Net.Http;
+using Azure.Core;
+using Newtonsoft.Json.Linq;
+
+using System.Net;
+
+
+
+
 
 namespace RulesSimulator.Controllers
 {
@@ -16,6 +28,7 @@ namespace RulesSimulator.Controllers
             this.ruleContext = ruleContext;
             
         }
+
         [HttpGet]
         [Route("GetRules")]
         public List<Rules> GetRules()
@@ -39,6 +52,99 @@ namespace RulesSimulator.Controllers
             return "Rule Added";
 
         }
+
+        /*private static JObject jsonData = new JObject();
+        [HttpPost("endpoint")]
+        public IActionResult PostJsonFile([FromBody] JObject json)
+        {
+            jsonData = json;
+            return Ok();
+        }
+        [HttpGet("endpoint")]
+        public IActionResult GetJsonFile()
+        {
+            return Ok(jsonData);
+        }
+
+*/
+
+        public static string ReadJsonFile(string path)
+        {
+            using (StreamReader r = new StreamReader(path))
+            {
+                string json = r.ReadToEnd();
+                return json;
+            }
+        }
+        [HttpGet("endpoint")]
+        public IActionResult GetJsonFile()
+        {
+            string path = @"C:\\Users\\MHlaili\\Desktop\\json\\fix.json";
+            var stream = System.IO.File.OpenRead(path);
+            return File(stream, "application/json");
+            /*var stream = System.IO.File.OpenRead(path);
+            return File(stream, "application/json");*/
+        }
+
+
+        /*[HttpGet("endpoint")]
+        public HttpResponseMessage GetJsonFile()
+        {
+            string path = @"C:\Users\MHlaili\Desktop\json\fix.json";
+            string json = ReadJsonFile(path);
+            var jsonObject = JObject.Parse(json); // Parse the JSON string into a JObject
+            var response = Request.CreateResponse(HttpStatusCode.OK);
+            response.Content = new StringContent(jsonObject.ToString(), Encoding.UTF8, "application/json");
+            return response;
+        }*/
+
+        /*[HttpGet("endpoint")]
+        public HttpResponseMessage GetJsonFile()
+        {
+            string path = @"C:\Users\MHlaili\Desktop\json\fix.json";
+            string json = ReadJsonFile(path);
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            response.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            return response;
+        }*/
+
+        /*[HttpGet("endpoint")]
+        public IActionResult GetJsonFile()
+        {
+            string path = @"C:\Users\MHlaili\Desktop\json\fix.json";
+            string json = ReadJsonFile(path);
+            return Ok(json);
+        }*/
+
+
+        /*[HttpGet("endpoint")]
+        public IActionResult ReceiveJsonData([FromQuery] string orderMessage)
+        {
+            try
+            {
+                // Log the received order message
+                Console.WriteLine($"Received order message: {orderMessage}");
+
+                // Return the order message in the response body
+                return Ok(orderMessage);
+            }
+            catch (Exception ex)
+            {
+                // If an error occurs, return a bad request response
+                Console.WriteLine($"Error processing order message: {ex.Message}");
+                return BadRequest("Error processing order message");
+            }
+        }*/
+        /*[HttpPost("endpoint")]
+        public IActionResult ReceiveJsonData([FromBody] dynamic jsonData)
+        {
+            // Log the received JSON data
+            Console.WriteLine($"Received JSON data: {jsonData}");
+
+            // You can also process the JSON data further as needed
+
+            return Ok(); // Return 200 OK response
+        }*/
 
         [HttpPut]
         [Route("UpdateRule")]
@@ -70,4 +176,5 @@ namespace RulesSimulator.Controllers
         }
 
     }
+   
 }

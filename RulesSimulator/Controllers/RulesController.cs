@@ -17,6 +17,7 @@ using System.Net;
 
 namespace RulesSimulator.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class RulesController : ControllerBase
@@ -52,23 +53,45 @@ namespace RulesSimulator.Controllers
             return "Rule Added";
 
         }
+        /*private static List<string> messages = new List<string>();
 
-        /*private static JObject jsonData = new JObject();
         [HttpPost("endpoint")]
-        public IActionResult PostJsonFile([FromBody] JObject json)
+        public IActionResult Post([FromBody] string message)
         {
-            jsonData = json;
+            // Log the message or do something with it
+            Console.WriteLine("Received message: " + message);
+
+            // Store the message
+            messages.Add(message);
+
+            // Return a success status code
             return Ok();
         }
+
         [HttpGet("endpoint")]
-        public IActionResult GetJsonFile()
+        public IActionResult Get()
         {
-            return Ok(jsonData);
-        }
+            // Return all messages
+            return Ok(messages);
+        }*/
+    
+
+    /*private static JObject jsonData = new JObject();
+    [HttpPost("endpoint")]
+    public IActionResult PostJsonFile([FromBody] JObject json)
+    {
+        jsonData = json;
+        return Ok();
+    }
+    [HttpGet("endpoint")]
+    public IActionResult GetJsonFile()
+    {
+        return Ok(jsonData);
+    }
 
 */
 
-        public static string ReadJsonFile(string path)
+    public static string ReadJsonFile(string path)
         {
             using (StreamReader r = new StreamReader(path))
             {
@@ -76,15 +99,27 @@ namespace RulesSimulator.Controllers
                 return json;
             }
         }
-        [HttpGet("endpoint")]
+        /*[HttpGet("endpoint")]
         public IActionResult GetJsonFile()
         {
-            string path = @"C:\\Users\\MHlaili\\Desktop\\json\\fix.json";
+            //string path = @"C:\\Users\\MHlaili\\Desktop\\json\\fix.json";
+            *//*string json = System.IO.File.ReadAllText(path);
+            var token = JToken.Parse(json); // Parse the JSON string into a JToken
+
+            if (token.Type == JTokenType.String)
+            {
+                // If the JToken is a string, parse it again into a JObject
+                var jsonObject = JObject.Parse(token.ToString());
+                string symbol = jsonObject["Body"]["55"].ToString(); // Access the 'symbol' field
+                return Ok(symbol);
+            }
+            else
+            {
+                return BadRequest("The JSON content is not a string that represents a JSON object.");
+            }*//*
             var stream = System.IO.File.OpenRead(path);
             return File(stream, "application/json");
-            /*var stream = System.IO.File.OpenRead(path);
-            return File(stream, "application/json");*/
-        }
+        }*/
 
 
         /*[HttpGet("endpoint")]

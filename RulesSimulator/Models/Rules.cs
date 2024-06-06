@@ -17,3 +17,4 @@ namespace RulesSimulator.Models
         public string Description { get; set; }
     }
 }
+

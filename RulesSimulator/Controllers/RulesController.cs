@@ -34,6 +34,7 @@ namespace RulesSimulator.Controllers
         [Route("GetRules")]
         public List<Rules> GetRules()
         {
+
             return ruleContext.Rules.ToList();
         }
         [HttpGet]

@@ -76,7 +76,9 @@ namespace BrokerSimulator.FIXAcceptor
                     {
                         Console.WriteLine("Symbol: " + value);
                         break;
+                       
                     }
+                    
                 }
             }
             Crack(message, sessionID);
@@ -118,8 +120,99 @@ namespace BrokerSimulator.FIXAcceptor
         public void OnLogon(SessionID sessionID) { }
         public void OnMessage(QuickFix.FIX44.NewOrderSingle order, SessionID sessionID)
         {
-            Console.WriteLine("GGGGGGG");
-            Console.WriteLine("Msg Recived");
+            Console.WriteLine("Fix Message Recived : ");
+            
+            if (order.Header.IsSetField(QuickFix.Fields.Tags.SenderCompID))
+            {
+                string senderCompID = order.Header.GetString(QuickFix.Fields.Tags.SenderCompID);
+                Console.WriteLine("SenderCompID: \t" + senderCompID );
+            }
+
+            // TargetCompID
+            if (order.Header.IsSetField(QuickFix.Fields.Tags.TargetCompID))
+            {
+                string targetCompID = order.Header.GetString(QuickFix.Fields.Tags.TargetCompID);
+                Console.WriteLine("TargetCompID: \t" + targetCompID);
+            }
+
+            // MsgType
+            if (order.Header.IsSetField(QuickFix.Fields.Tags.MsgType))
+            {
+                string msgType = order.Header.GetString(QuickFix.Fields.Tags.MsgType);
+                Console.WriteLine("MsgType: \t" + msgType);
+                if(msgType == "D") { Console.WriteLine("D is a New Order - Single"); }
+                if(msgType == "0") { Console.WriteLine("0 is a Heartbeat"); }
+                if(msgType == "5") { Console.WriteLine("5 is a Logout"); }
+                if(msgType == "A") { Console.WriteLine("A is a Logon"); }
+                if(msgType == "F") { Console.WriteLine("D is an Order Cancel Request"); }
+                if(msgType == "8") { Console.WriteLine("D is an Execution Report"); }
+            }
+
+            // MsgSeqNum
+            if (order.Header.IsSetField(QuickFix.Fields.Tags.MsgSeqNum))
+            {
+                int msgSeqNum = order.Header.GetInt(QuickFix.Fields.Tags.MsgSeqNum);
+                Console.WriteLine("MsgSeqNum: \t" + msgSeqNum);
+            }
+
+            // SendingTime
+            if (order.Header.IsSetField(QuickFix.Fields.Tags.SendingTime))
+            {
+                DateTime sendingTime = order.Header.GetDateTime(QuickFix.Fields.Tags.SendingTime);
+                Console.WriteLine("SendingTime: \t" + sendingTime);
+            }
+            
+            if (order.IsSetField(QuickFix.Fields.Tags.ClOrdID))
+            {
+                string clOrdID = order.GetString(QuickFix.Fields.Tags.ClOrdID);
+                Console.WriteLine("ClOrdID: \t" + clOrdID);
+            }
+
+            // Side
+            if (order.IsSetField(QuickFix.Fields.Tags.Side))
+            {
+                char side = order.GetChar(QuickFix.Fields.Tags.Side);
+                Console.WriteLine("Side: \t" + side);
+            }
+
+            // TransactTime
+            if (order.IsSetField(QuickFix.Fields.Tags.TransactTime))
+            {
+                DateTime transactTime = order.GetDateTime(QuickFix.Fields.Tags.TransactTime);
+                Console.WriteLine("TransactTime: \t" + transactTime);
+            }
+
+            // OrderQty
+            if (order.IsSetField(QuickFix.Fields.Tags.OrderQty))
+            {
+                decimal orderQty = order.GetDecimal(QuickFix.Fields.Tags.OrderQty);
+                Console.WriteLine("OrderQty: \t" + orderQty);
+            }
+
+            // OrdType
+            if (order.IsSetField(QuickFix.Fields.Tags.OrdType))
+            {
+                char ordType = order.GetChar(QuickFix.Fields.Tags.OrdType);
+                Console.WriteLine("OrdType: \t" + ordType);
+            }
+
+            // Price
+            if (order.IsSetField(QuickFix.Fields.Tags.Price))
+            {
+                decimal price = order.GetDecimal(QuickFix.Fields.Tags.Price);
+                Console.WriteLine("Price: \t" + price);
+            }
+
+            // Symbol
+            if (order.IsSetField(QuickFix.Fields.Tags.Symbol))
+            {
+                string symbol = order.GetString(QuickFix.Fields.Tags.Symbol);
+                Console.WriteLine("Symbol: \t" + symbol);
+            }
+
+                /*Console.WriteLine("GGGGGGG");*/
+
+                Console.WriteLine("the symbol is " + order.Symbol + " : I will Execute Partially !");
 
             Session.SendToTarget(order, sessionID);
             //ToApp(null, sessionID);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
-
+using Microsoft.Data.SqlClient;
 using QuickFix;
 using QuickFix.Fields;
 using RulesSimulator.FIXAcceptor;
@@ -20,30 +20,78 @@ namespace BrokerSimulator.FIXAcceptor
     public class SimpleAcceptorApp : QuickFix.MessageCracker, QuickFix.IApplication
     {
         #region QuickFix.Application Methods
-       /* public Rules SomeMethod(string symbol)
+        /* public Rules SomeMethod(string symbol)
+         {
+             var con = ConfigurationManager.ConnectionStrings["DbCon"].ToString();
+
+             Person matchingPerson = new Person();
+             using (SqlConnection myConnection = new SqlConnection(con))
+             {
+                 string oString = "Select * from Employees where FirstName=@fName";
+                 SqlCommand oCmd = new SqlCommand(oString, myConnection);
+                 oCmd.Parameters.AddWithValue("@Fname", fName);
+                 myConnection.Open();
+                 using (SqlDataReader oReader = oCmd.ExecuteReader())
+                 {
+                     while (oReader.Read())
+                     {
+                         matchingPerson.firstName = oReader["FirstName"].ToString();
+                         matchingPerson.lastName = oReader["LastName"].ToString();
+                     }
+
+                     myConnection.Close();
+                 }
+             }
+             return matchingPerson;
+         }*/
+        static public bool IsMatching(QuickFix.FIX44.NewOrderSingle order)
         {
-            var con = ConfigurationManager.ConnectionStrings["DbCon"].ToString();
+            string connectionString = "server=TN1PFE-008\\SQLEXPRESS; database= RulesDB; Integrated Security=true; TrustServerCertificate=True"; // Replace with your actual connection string
+            string query = "SELECT * FROM RulesDB.dbo.Rules";
 
-            Person matchingPerson = new Person();
-            using (SqlConnection myConnection = new SqlConnection(con))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string oString = "Select * from Employees where FirstName=@fName";
-                SqlCommand oCmd = new SqlCommand(oString, myConnection);
-                oCmd.Parameters.AddWithValue("@Fname", fName);
-                myConnection.Open();
-                using (SqlDataReader oReader = oCmd.ExecuteReader())
-                {
-                    while (oReader.Read())
-                    {
-                        matchingPerson.firstName = oReader["FirstName"].ToString();
-                        matchingPerson.lastName = oReader["LastName"].ToString();
-                    }
+                SqlCommand command = new SqlCommand(query, connection);
 
-                    myConnection.Close();
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        Rules rule = new Rules
+                        {
+                            ID = reader.GetInt32(0),
+                            symbol = reader.GetString(1),
+                            Description = reader.GetString(2),
+                            MinPrice = reader.GetDecimal(3),
+                            MaxPrice = reader.GetDecimal(4),
+                            MinQty = reader.GetDecimal(5),
+                            MaxQty = reader.GetDecimal(6),
+                            ruleTypeID = reader.GetInt32(7)
+                        };
+
+                        Console.WriteLine($"Id: {rule.ID}, Symbol: {rule.symbol},Description: {rule.Description}, RuleTypeID: {rule.ruleTypeID}, " +
+                                          $"MinPrice: {rule.MinPrice}, MaxPrice: {rule.MaxPrice}, MinQty: {rule.MinQty}, MaxQty: {rule.MaxQty}");
+                        if (rule.symbol == order.GetString(QuickFix.Fields.Tags.Symbol))
+                        {
+                            Console.WriteLine("Rule Matched !!");
+                            Console.WriteLine("the symbol is " + rule.symbol +"===>"+ rule.Description);
+                            return true;
+                        }
+                        else { Console.WriteLine("Not matcheed"); }
+                    }
+                    reader.Close();
+
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                return false;
             }
-            return matchingPerson;
-        }*/
+        }
         public void Reject_Security(string x)
         {
             if (x == "IBM")
@@ -120,6 +168,9 @@ namespace BrokerSimulator.FIXAcceptor
         public void OnLogon(SessionID sessionID) { }
         public void OnMessage(QuickFix.FIX44.NewOrderSingle order, SessionID sessionID)
         {
+            if (IsMatching(order)) { Console.WriteLine("This Order is Matching a Rule !"); }
+            else { Console.WriteLine("No Rule Match This Order"); }
+            Console.WriteLine("Fix Message Recived : ");
             Console.WriteLine("Fix Message Recived : ");
             
             if (order.Header.IsSetField(QuickFix.Fields.Tags.SenderCompID))
@@ -209,10 +260,16 @@ namespace BrokerSimulator.FIXAcceptor
                 string symbol = order.GetString(QuickFix.Fields.Tags.Symbol);
                 Console.WriteLine("Symbol: \t" + symbol);
             }
+            //Quantity
+            /*if (order.IsSetField(QuickFix.Fields.Tags.Quantity))
+            {
+                string Quantity = order.GetString(QuickFix.Fields.Tags.Quantity);
+                Console.WriteLine("Quantity: \t" + Quantity);
+            }*/
 
-                /*Console.WriteLine("GGGGGGG");*/
+            /*Console.WriteLine("GGGGGGG");*/
 
-                Console.WriteLine("the symbol is " + order.Symbol + " : I will Execute Partially !");
+            Console.WriteLine("the symbol is " + order.Symbol + " : I will Execute Partially !");
 
             Session.SendToTarget(order, sessionID);
             //ToApp(null, sessionID);
